@@ -1,0 +1,1127 @@
+<title>Laglyftet</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,600;0,700;1,800&family=Figtree:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: one phone-sized app column on a pitch-tinted ground; header with search and radius, card deck in the middle, tab bar pinned below; sheets slide up over the app. */
+:root {
+  --bg: #e4ebe5;
+  --surface: #ffffff;
+  --surface-2: #f4f7f4;
+  --ink: #13221a;
+  --muted: #5d6f64;
+  --line: #d3ddd5;
+  --pitch: #1f6b45;
+  --pitch-ink: #ffffff;
+  --pitch-soft: #e3efe7;
+  --track: #e2e9e3;
+  --gold: #e6b417;
+  --skip: #b23a3a;
+  --warn-bg: #fff6dc;
+  --warn-ink: #6b5205;
+  --shadow: 0 10px 30px rgba(19, 34, 26, .14);
+  --display: "Barlow Condensed", "Arial Narrow", "Helvetica Neue", sans-serif;
+  --body: "Figtree", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0b110d; --surface: #17201a; --surface-2: #111814; --ink: #e6eee8; --muted: #93a69a;
+    --line: #26332b; --pitch: #3ca46d; --pitch-ink: #07150d; --pitch-soft: #1a2e22; --track: #24302a;
+    --gold: #f0c234; --skip: #e06a6a; --warn-bg: #2e2810; --warn-ink: #f0d27a;
+    --shadow: 0 10px 30px rgba(0, 0, 0, .5); color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0b110d; --surface: #17201a; --surface-2: #111814; --ink: #e6eee8; --muted: #93a69a;
+  --line: #26332b; --pitch: #3ca46d; --pitch-ink: #07150d; --pitch-soft: #1a2e22; --track: #24302a;
+  --gold: #f0c234; --skip: #e06a6a; --warn-bg: #2e2810; --warn-ink: #f0d27a;
+  --shadow: 0 10px 30px rgba(0, 0, 0, .5); color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 15px;
+  display: flex; justify-content: center; align-items: center;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 16px;
+}
+button, input, select { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+h1, h2, h3, p { margin: 0; }
+
+.app {
+  position: relative; width: 100%; max-width: 420px; height: 100%; max-height: 900px;
+  background: var(--surface-2); border: 1px solid var(--line); border-radius: 28px;
+  display: flex; flex-direction: column; overflow: hidden; box-shadow: var(--shadow);
+}
+
+/* Header */
+.top { padding: 14px 16px 4px; display: flex; flex-direction: column; gap: 10px; }
+.top-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.logo { font-family: var(--display); font-weight: 800; font-style: italic; font-size: 30px; text-transform: uppercase; line-height: 1; display: flex; align-items: center; gap: 4px; }
+.logo span { color: var(--pitch); }
+.logo svg { width: 20px; height: 20px; color: var(--pitch); }
+.where { display: inline-flex; align-items: center; gap: 5px; font-size: 12.5px; font-weight: 600; color: var(--muted); white-space: nowrap; }
+.where svg { width: 14px; height: 14px; }
+.search-row { display: flex; gap: 8px; }
+.search { flex: 1; min-width: 0; position: relative; }
+.search svg { position: absolute; left: 11px; top: 50%; width: 16px; height: 16px; transform: translateY(-50%); color: var(--muted); }
+.search input { width: 100%; padding: 10px 12px 10px 34px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); }
+.radius { padding: 10px 8px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); font-weight: 600; font-size: 14px; }
+.proto { font-size: 11.5px; color: var(--muted); padding: 0 2px; }
+
+.view { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+
+/* Deck */
+.deck { position: relative; flex: 1; min-height: 0; margin: 10px 16px 4px; }
+.card {
+  position: absolute; inset: 0; background: var(--surface); border-radius: 22px; overflow: hidden;
+  display: flex; flex-direction: column; box-shadow: var(--shadow); border: 1px solid var(--line);
+  touch-action: none; user-select: none; transition: transform .28s ease, opacity .28s ease;
+}
+.card.top { cursor: grab; }
+.card.top:active { cursor: grabbing; }
+.photo-wrap { position: relative; flex: 0 0 42%; min-height: 140px; background: #3f8a4a; }
+.photo { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.chip-row { position: absolute; top: 10px; left: 10px; right: 10px; display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; z-index: 2; }
+.chips { display: flex; gap: 6px; flex-wrap: wrap; }
+.chip { background: rgba(0, 0, 0, .5); color: #fff; font-size: 12px; font-weight: 600; padding: 5px 9px; border-radius: 999px; backdrop-filter: blur(4px); }
+.chip.new { background: var(--gold); color: #1a1a1a; }
+.info-btn { width: 32px; height: 32px; border-radius: 50%; border: 0; background: rgba(0, 0, 0, .5); color: #fff; display: grid; place-items: center; flex: none; }
+.info-btn svg { width: 18px; height: 18px; }
+.crest-badge { position: absolute; left: 14px; bottom: -26px; z-index: 3; width: 58px; height: 60px; }
+.crest { width: 100%; height: 100%; filter: drop-shadow(0 4px 8px rgba(0, 0, 0, .3)); display: block; }
+.stamp {
+  position: absolute; top: 52px; z-index: 4; font-family: var(--display); font-weight: 700; font-size: 34px;
+  letter-spacing: .06em; padding: 2px 12px; border: 4px solid #fff; border-radius: 8px; opacity: 0; pointer-events: none; color: #fff;
+}
+.stamp.yes { left: 18px; background: #1f8a50; transform: rotate(-12deg); }
+.stamp.no { right: 18px; background: #a83232; transform: rotate(12deg); }
+
+.body { flex: 1; min-height: 0; padding: 12px 18px 14px; display: flex; flex-direction: column; gap: 8px; overflow: hidden; }
+.club { padding-left: 64px; min-height: 22px; display: flex; align-items: center; gap: 5px; font-size: 12.5px; font-weight: 700; color: var(--pitch); text-transform: uppercase; letter-spacing: .05em; }
+.club svg { width: 15px; height: 15px; flex: none; }
+.goal { font-family: var(--display); font-weight: 700; font-size: 29px; line-height: 1; text-transform: uppercase; text-wrap: balance; margin-top: 4px; }
+.desc { color: var(--muted); line-height: 1.45; font-size: 14px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.kak-line { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; background: var(--warn-bg); color: var(--warn-ink); border-radius: 10px; padding: 7px 10px; }
+.kak-line svg { width: 18px; height: 18px; flex: none; }
+.money { margin-top: auto; display: flex; flex-direction: column; gap: 6px; }
+.bar { height: 10px; border-radius: 999px; background: var(--track); overflow: hidden; display: flex; }
+.bar .ok { display: block; height: 100%; background: linear-gradient(90deg, var(--pitch), color-mix(in srgb, var(--pitch) 60%, var(--gold))); transition: width .8s cubic-bezier(.2, .8, .2, 1); }
+.bar .pend { display: block; height: 100%; background: repeating-linear-gradient(135deg, var(--gold) 0 5px, color-mix(in srgb, var(--gold) 55%, transparent) 5px 10px); transition: width .8s cubic-bezier(.2, .8, .2, 1); }
+.nums { display: flex; align-items: baseline; gap: 6px; font-variant-numeric: tabular-nums; flex-wrap: wrap; }
+.nums b { font-size: 17px; }
+.nums small { color: var(--muted); font-size: 13px; }
+.nums .pct { margin-left: auto; font-family: var(--display); font-weight: 700; font-size: 19px; color: var(--pitch); }
+.pend-note { font-size: 12px; color: var(--muted); display: flex; align-items: center; gap: 6px; }
+.pend-note i { width: 12px; height: 8px; border-radius: 3px; background: repeating-linear-gradient(135deg, var(--gold) 0 3px, color-mix(in srgb, var(--gold) 55%, transparent) 3px 6px); }
+.meta { display: flex; gap: 12px; font-size: 12.5px; color: var(--muted); font-variant-numeric: tabular-nums; flex-wrap: wrap; }
+.meta strong { color: var(--ink); font-weight: 600; }
+
+.empty { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 10px; padding: 24px; color: var(--muted); }
+.empty h2 { font-family: var(--display); font-size: 27px; text-transform: uppercase; color: var(--ink); }
+.empty p { max-width: 30ch; line-height: 1.45; }
+
+.actions { display: flex; justify-content: center; align-items: center; gap: 20px; padding: 8px 0 12px; }
+.round { border-radius: 50%; border: 1px solid var(--line); background: var(--surface); display: grid; place-items: center; box-shadow: 0 4px 12px rgba(0, 0, 0, .08); transition: transform .15s ease; }
+.round:hover { transform: scale(1.06); }
+.round:active { transform: scale(.94); }
+.round svg { width: 26px; height: 26px; }
+.round.skip { width: 56px; height: 56px; color: var(--skip); }
+.round.give { width: 48px; height: 48px; color: var(--gold); }
+.round.give svg { width: 22px; height: 22px; }
+.round.like { width: 64px; height: 64px; background: var(--pitch); color: var(--pitch-ink); border-color: transparent; }
+.round.like svg { width: 30px; height: 30px; }
+.round[disabled] { opacity: .4; cursor: default; transform: none; }
+
+/* Lists */
+.list { flex: 1; min-height: 0; overflow-y: auto; padding: 12px 16px 16px; display: flex; flex-direction: column; gap: 12px; }
+.list-title { font-family: var(--display); font-size: 26px; text-transform: uppercase; }
+.list-sub { color: var(--muted); font-size: 13.5px; line-height: 1.45; }
+.row { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 14px; display: grid; grid-template-columns: 44px 1fr; gap: 6px 12px; align-items: start; }
+.row .crest { width: 44px; height: 46px; grid-row: span 2; filter: none; }
+.row .club { padding-left: 0; min-height: 0; font-size: 11.5px; }
+.row h3 { font-size: 16px; font-weight: 700; line-height: 1.25; }
+.row .money, .row .latest, .row .row-foot, .row .steps, .row .full { grid-column: 1 / -1; }
+.row .nums b { font-size: 15px; }
+.row .nums .pct { font-size: 16px; }
+.result { text-align: left; border: 1px solid var(--line); background: var(--surface); width: 100%; cursor: pointer; }
+.result:hover { border-color: var(--pitch); }
+.latest { font-size: 13px; color: var(--muted); background: var(--surface-2); border-radius: 10px; padding: 8px 10px; line-height: 1.4; }
+.latest b { color: var(--ink); font-weight: 600; }
+.row-foot { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
+.row-foot .mine { font-size: 13px; color: var(--pitch); font-weight: 600; }
+.btns { display: flex; gap: 8px; flex-wrap: wrap; }
+.btn { border: 0; border-radius: 12px; padding: 9px 14px; font-weight: 700; background: var(--pitch); color: var(--pitch-ink); }
+.btn.ghost { background: transparent; color: var(--ink); border: 1px solid var(--line); }
+.btn.small { padding: 7px 11px; font-size: 13px; }
+.list-empty { text-align: center; color: var(--muted); padding: 32px 16px; line-height: 1.5; }
+.total { background: var(--pitch); color: var(--pitch-ink); border-radius: 16px; padding: 14px 16px; display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.total b { font-family: var(--display); font-size: 28px; font-variant-numeric: tabular-nums; }
+
+/* Team & club views */
+.seg { display: grid; grid-template-columns: 1fr 1fr; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 3px; gap: 3px; }
+.seg button { border: 0; background: none; border-radius: 9px; padding: 8px; font-weight: 600; font-size: 14px; color: var(--muted); }
+.seg button[aria-pressed="true"] { background: var(--pitch); color: var(--pitch-ink); }
+.persona { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--muted); }
+.persona .avatar { width: 34px; height: 34px; font-size: 12px; }
+.persona b { color: var(--ink); display: block; font-size: 14px; }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 14px; display: flex; flex-direction: column; gap: 10px; }
+.panel h3 { font-size: 15px; font-weight: 700; display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.panel h3 small { font-weight: 500; color: var(--muted); font-size: 12.5px; }
+.club-head { display: grid; grid-template-columns: 52px 1fr; gap: 12px; align-items: center; }
+.club-head .crest { width: 52px; height: 54px; filter: none; }
+.club-head h2 { font-family: var(--display); font-size: 26px; text-transform: uppercase; line-height: 1; }
+.club-head p { font-size: 12.5px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.pill { display: inline-flex; align-items: center; gap: 4px; font-size: 11.5px; font-weight: 700; padding: 3px 8px; border-radius: 999px; background: var(--pitch-soft); color: var(--pitch); white-space: nowrap; }
+.pill.wait { background: var(--warn-bg); color: var(--warn-ink); }
+.pill.none { background: var(--surface-2); color: var(--muted); border: 1px solid var(--line); }
+.steps { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0; }
+.steps li { display: grid; grid-template-columns: 22px 1fr; gap: 10px; font-size: 13.5px; position: relative; padding-bottom: 12px; }
+.steps li:last-child { padding-bottom: 0; }
+.steps li::before { content: ""; position: absolute; left: 10px; top: 22px; bottom: 0; width: 2px; background: var(--line); }
+.steps li:last-child::before { display: none; }
+.dot { width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--line); background: var(--surface); display: grid; place-items: center; }
+.dot svg { width: 13px; height: 13px; }
+.steps .done .dot { background: var(--pitch); border-color: var(--pitch); color: var(--pitch-ink); }
+.steps .now .dot { border-color: var(--gold); background: var(--warn-bg); }
+.steps small { display: block; color: var(--muted); font-size: 12px; margin-top: 1px; }
+.steps .later { color: var(--muted); }
+.tbl-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th { text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); font-weight: 600; padding: 6px 4px; border-bottom: 1px solid var(--line); }
+td { padding: 9px 4px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+tr:last-child td { border-bottom: 0; }
+.pending { border: 1px dashed var(--line); border-radius: 12px; padding: 10px 12px; display: flex; flex-direction: column; gap: 8px; }
+.pending p { font-size: 13px; color: var(--muted); line-height: 1.4; }
+.pending b { color: var(--ink); }
+.report { display: grid; grid-template-columns: 1fr auto; gap: 4px 10px; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--line); font-size: 13.5px; }
+.report:last-child { border-bottom: 0; }
+.report small { color: var(--muted); font-size: 12px; display: block; }
+.report .num { font-weight: 700; font-variant-numeric: tabular-nums; text-align: right; }
+.report .btns { grid-column: 1 / -1; }
+.form { display: flex; flex-direction: column; gap: 10px; }
+.field { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+.field label, legend, .label { font-size: 12.5px; font-weight: 600; color: var(--muted); }
+.field input, .field select { width: 100%; padding: 10px 12px; border-radius: 12px; border: 1.5px solid var(--line); background: var(--surface-2); color: var(--ink); }
+.two { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.three { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+.consent { display: grid; grid-template-columns: 20px 1fr; gap: 8px; font-size: 13px; line-height: 1.4; align-items: start; }
+.consent input { margin-top: 2px; accent-color: var(--pitch); }
+.sub-box { border-left: 3px solid var(--gold); padding-left: 10px; display: flex; flex-direction: column; gap: 8px; }
+.err { color: var(--skip); font-size: 12.5px; font-weight: 600; }
+.note { font-size: 12.5px; color: var(--warn-ink); background: var(--warn-bg); border-radius: 10px; padding: 9px 11px; line-height: 1.4; }
+
+/* Tab bar */
+.tabs { display: grid; grid-template-columns: repeat(3, 1fr); border-top: 1px solid var(--line); background: var(--surface); }
+.tab { border: 0; background: none; padding: 9px 0 11px; display: flex; flex-direction: column; align-items: center; gap: 3px; font-size: 12px; font-weight: 600; color: var(--muted); position: relative; }
+.tab svg { width: 22px; height: 22px; }
+.tab[aria-selected="true"] { color: var(--pitch); }
+.badge { position: absolute; top: 5px; left: calc(50% + 6px); min-width: 18px; height: 18px; padding: 0 5px; border-radius: 999px; background: var(--gold); color: #1a1a1a; font-size: 11px; font-weight: 700; display: grid; place-items: center; }
+
+/* Toast */
+.toast {
+  position: absolute; left: 14px; right: 14px; bottom: 74px; z-index: 40; background: var(--ink); color: var(--surface);
+  border-radius: 14px; padding: 12px 14px; display: flex; align-items: center; gap: 10px; font-size: 14px;
+  transform: translateY(20px); opacity: 0; pointer-events: none; transition: .25s ease;
+}
+.toast.show { transform: none; opacity: 1; pointer-events: auto; }
+.toast span { flex: 1; min-width: 0; }
+.toast button { background: var(--gold); color: #1a1a1a; border: 0; border-radius: 10px; padding: 7px 12px; font-weight: 700; }
+
+/* Sheet */
+.scrim { position: absolute; inset: 0; background: rgba(0, 0, 0, .45); z-index: 30; opacity: 0; pointer-events: none; transition: opacity .25s ease; }
+.scrim.open { opacity: 1; pointer-events: auto; }
+.sheet {
+  position: absolute; left: 0; right: 0; bottom: 0; z-index: 31; background: var(--surface); border-radius: 24px 24px 0 0;
+  padding: 10px 18px 20px; transform: translateY(100%); transition: transform .3s cubic-bezier(.2, .8, .2, 1);
+  max-height: 94%; overflow-y: auto;
+}
+.sheet.open { transform: none; }
+.grab-row { display: flex; justify-content: center; position: relative; margin-bottom: 10px; }
+.grab { width: 40px; height: 5px; border-radius: 999px; background: var(--line); margin-top: 4px; }
+.close { position: absolute; right: -6px; top: -4px; border: 0; background: var(--surface-2); width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; }
+.close svg { width: 16px; height: 16px; }
+#sheet-content { display: flex; flex-direction: column; gap: 12px; }
+.eyebrow { font-size: 12px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); font-weight: 600; }
+.sheet h3.big { font-family: var(--display); font-size: 27px; text-transform: uppercase; line-height: 1.05; margin-top: -8px; }
+.sub { color: var(--muted); line-height: 1.4; }
+.kak-offer { border: 1.5px solid var(--gold); background: var(--warn-bg); border-radius: 14px; padding: 12px; display: flex; flex-direction: column; gap: 8px; color: var(--warn-ink); font-size: 13.5px; line-height: 1.4; }
+.kak-offer b.h { font-family: var(--display); font-size: 21px; text-transform: uppercase; color: var(--ink); line-height: 1; }
+.kak-offer button { align-self: flex-start; border: 0; border-radius: 10px; padding: 9px 14px; font-weight: 700; background: var(--gold); color: #1a1a1a; }
+.kak-offer button[aria-pressed="true"] { outline: 2px solid var(--ink); outline-offset: 2px; }
+.amounts { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.amt { border: 1.5px solid var(--line); background: var(--surface-2); border-radius: 12px; padding: 11px 0; font-weight: 700; font-variant-numeric: tabular-nums; }
+.amt[aria-pressed="true"] { border-color: var(--pitch); background: var(--pitch-soft); color: var(--pitch); }
+fieldset { border: 0; padding: 0; margin: 0; min-width: 0; }
+legend { padding: 0; margin-bottom: 6px; }
+.opts { display: flex; flex-direction: column; gap: 6px; }
+.opt { display: grid; grid-template-columns: 20px 1fr; gap: 10px; align-items: center; border: 1.5px solid var(--line); border-radius: 12px; padding: 10px 12px; cursor: pointer; }
+.opt:has(input:checked) { border-color: var(--pitch); background: var(--pitch-soft); }
+.opt input { accent-color: var(--pitch); margin: 0; }
+.opt span { font-weight: 600; font-size: 14px; }
+.opt small { display: block; color: var(--muted); font-size: 12.5px; font-weight: 400; }
+.fine { font-size: 12px; color: var(--muted); line-height: 1.4; }
+.swishbox { border: 1.5px solid var(--line); border-radius: 14px; overflow: hidden; font-size: 13.5px; }
+.swishbox div { display: flex; justify-content: space-between; gap: 12px; padding: 9px 12px; border-bottom: 1px solid var(--line); font-variant-numeric: tabular-nums; }
+.swishbox div:last-child { border-bottom: 0; }
+.swishbox span:first-child { color: var(--muted); }
+.swishbox span:last-child { font-weight: 600; text-align: right; }
+.qr { border: 2px dashed var(--line); border-radius: 14px; padding: 14px; display: grid; grid-template-columns: 64px 1fr; gap: 12px; align-items: center; font-size: 12.5px; color: var(--muted); line-height: 1.4; }
+.qr svg { width: 64px; height: 64px; color: var(--muted); }
+.primary { width: 100%; border: 0; border-radius: 14px; padding: 14px; font-weight: 700; font-size: 16px; background: var(--pitch); color: var(--pitch-ink); }
+.primary[disabled] { opacity: .5; cursor: default; }
+.secondary { width: 100%; border-radius: 14px; padding: 12px; font-weight: 700; background: transparent; border: 1px solid var(--line); }
+.state { text-align: center; padding: 10px 0 0; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.state .money { width: 100%; text-align: left; margin: 4px 0; }
+.check { width: 62px; height: 62px; border-radius: 50%; background: var(--pitch); color: var(--pitch-ink); display: grid; place-items: center; }
+.check svg { width: 34px; height: 34px; }
+
+/* Detail */
+.detail-photo { position: relative; height: 160px; border-radius: 16px; overflow: hidden; background: #3f8a4a; }
+.detail-photo .crest-badge { bottom: 10px; left: 10px; width: 48px; height: 50px; }
+.trust { display: flex; flex-wrap: wrap; gap: 6px; }
+.earmark { background: var(--pitch-soft); border-radius: 12px; padding: 10px 12px; font-size: 13.5px; line-height: 1.45; }
+.supporters { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.supporters li { display: flex; align-items: center; gap: 8px; font-size: 14px; }
+.avatar { width: 28px; height: 28px; border-radius: 50%; background: var(--surface-2); border: 1px solid var(--line); display: grid; place-items: center; font-size: 11px; font-weight: 700; color: var(--muted); flex: none; }
+.supporters time { margin-left: auto; color: var(--muted); font-size: 12px; }
+
+/* Share */
+.story { position: relative; align-self: center; width: min(240px, 80%); aspect-ratio: 9 / 14; max-width: 100%; border-radius: 18px; overflow: hidden; color: #fff; box-shadow: var(--shadow); background: #13221a; }
+.story .photo { height: 58%; bottom: auto; }
+.story .shade { position: absolute; inset: 0; background: linear-gradient(180deg, transparent 30%, rgba(8, 20, 12, .95) 62%); }
+.story .crest-badge { left: 50%; transform: translateX(-50%); top: 44%; bottom: auto; width: 54px; height: 56px; }
+.story-text { position: absolute; left: 14px; right: 14px; bottom: 14px; display: flex; flex-direction: column; gap: 5px; text-align: center; }
+.story-text .s1 { font-size: 12px; opacity: .85; }
+.story-text .s2 { font-family: var(--display); font-size: 22px; font-weight: 700; text-transform: uppercase; line-height: 1.05; }
+.story-text .bar { height: 7px; background: rgba(255, 255, 255, .2); margin-top: 4px; }
+.story-text .s3 { font-size: 11.5px; opacity: .85; font-variant-numeric: tabular-nums; }
+.story-text .brand { font-family: var(--display); font-style: italic; font-weight: 800; font-size: 14px; text-transform: uppercase; margin-top: 4px; letter-spacing: .02em; }
+.switches { display: flex; flex-direction: column; gap: 8px; }
+.switch { display: flex; justify-content: space-between; align-items: center; gap: 10px; font-size: 14px; font-weight: 600; }
+.switch input { width: 20px; height: 20px; accent-color: var(--pitch); }
+.share-btns { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.share-btns button { border: 1px solid var(--line); background: var(--surface-2); border-radius: 12px; padding: 10px 4px; font-weight: 600; font-size: 13px; }
+.link { font-size: 12.5px; color: var(--muted); text-align: center; user-select: all; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition: none !important; animation-duration: .01ms !important; }
+}
+</style>
+
+<div class="app" id="app">
+  <header class="top">
+    <div class="top-row">
+      <h1 class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20V5M5 11l7-7 7 7"/></svg>Lag<span>lyftet</span></h1>
+      <span class="where"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 22s7-6.2 7-12a7 7 0 1 0-14 0c0 5.8 7 12 7 12Z"/><circle cx="12" cy="10" r="2.5"/></svg>Södermalm, Stockholm</span>
+    </div>
+    <div class="search-row" id="search-row">
+      <div class="search">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <input id="q" type="search" placeholder="Sök förening, lag eller ort" aria-label="Sök förening, lag eller ort" autocomplete="off">
+      </div>
+      <select class="radius" id="radius" aria-label="Avstånd">
+        <option value="10">10 km</option>
+        <option value="50">50 km</option>
+        <option value="500">500 km</option>
+        <option value="all">Hela Sverige</option>
+      </select>
+    </div>
+    <p class="proto">Prototyp med påhittade föreningar och Swish-nummer. Inga riktiga betalningar görs.</p>
+  </header>
+
+  <section class="view" id="view-discover">
+    <div class="deck" id="deck" aria-live="polite"></div>
+    <div class="actions" id="actions">
+      <button class="round skip" id="btn-skip" aria-label="Hoppa över (vänsterpil)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+      <button class="round give" id="btn-give" aria-label="Swisha direkt"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="9"/><path d="M14.8 9.2c-.5-.8-1.5-1.2-2.8-1.2-1.6 0-2.8.8-2.8 2s1.2 1.6 2.8 2 2.8.8 2.8 2-1.2 2-2.8 2c-1.3 0-2.3-.5-2.8-1.2M12 6.5v11"/></svg></button>
+      <button class="round like" id="btn-like" aria-label="Stöd laget (högerpil)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 21s-7.5-4.6-9.6-9.3C1 8.4 3 5 6.4 5c2 0 3.6 1.1 4.4 2.6h2.4C14 6.1 15.6 5 17.6 5 21 5 23 8.4 21.6 11.7 19.5 16.4 12 21 12 21Z"/></svg></button>
+    </div>
+    <div class="list" id="results" hidden></div>
+  </section>
+
+  <section class="view" id="view-saved" hidden><div class="list" id="saved-list"></div></section>
+  <section class="view" id="view-team" hidden><div class="list" id="team-view"></div></section>
+
+  <nav class="tabs" role="tablist">
+    <button class="tab" role="tab" id="tab-discover" aria-selected="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="3" width="14" height="18" rx="3"/><path d="M9 3.5 7 2M15 3.5 17 2"/></svg>Upptäck
+    </button>
+    <button class="tab" role="tab" id="tab-saved" aria-selected="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20s-6.5-4-8.3-8C2.5 9.2 4.2 6 7.2 6c1.8 0 3.2 1 4 2.3h1.6C13.6 7 15 6 16.8 6c3 0 4.7 3.2 3.5 6-1.8 4-8.3 8-8.3 8Z"/></svg>Mina lag
+      <span class="badge" id="badge" hidden>0</span>
+    </button>
+    <button class="tab" role="tab" id="tab-team" aria-selected="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3 4 6v6c0 4.4 3.4 8.2 8 9 4.6-.8 8-4.6 8-9V6l-8-3Z"/><path d="m9 12 2 2 4-4"/></svg>Lag &amp; förening
+      <span class="badge" id="team-badge" hidden>0</span>
+    </button>
+  </nav>
+
+  <div class="toast" id="toast" role="status"><span id="toast-text"></span><button id="toast-btn" hidden></button></div>
+  <div class="scrim" id="scrim"></div>
+  <div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-title">
+    <div class="grab-row"><div class="grab"></div><button class="close" id="sheet-close" aria-label="Stäng"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+    <div id="sheet-content"></div>
+  </div>
+</div>
+
+<script>
+/* Fictional clubs; Swish numbers are made up and marked as examples */
+const CLUBS = {
+  solbacka:  { name: 'Solbacka IF',      crest: 'SIF', c1: '#1d4e9e', c2: '#f5c518', teams: 52, swish: '123 000 00 01', checked: '12 okt 2026' },
+  strand:    { name: 'Strandvikens FF',  crest: 'SFF', c1: '#0f7a6c', c2: '#ffffff', teams: 14, swish: '123 000 00 11', checked: '3 sep 2026' },
+  kvarnbyn:  { name: 'Kvarnbyns BK',     crest: 'KBK', c1: '#b3202a', c2: '#ffffff', teams: 23, swish: '123 000 00 21', checked: '20 sep 2026' },
+  ekeby:     { name: 'Ekeby United',     crest: 'EU',  c1: '#232323', c2: '#e8b923', teams: 31, swish: '123 000 00 31', checked: '1 okt 2026' },
+  lindhagen: { name: 'Lindhagens IK',    crest: 'LIK', c1: '#5a2d82', c2: '#f2f2f2', teams: 18, swish: '123 000 00 41', checked: '8 okt 2026' },
+  vasterang: { name: 'Västerängens IF',  crest: 'VIF', c1: '#2f7d32', c2: '#ffffff', teams: 9,  swish: '123 000 00 51', checked: '15 sep 2026' },
+  norrtorp:  { name: 'Norrtorps DFF',    crest: 'NDF', c1: '#c94f0c', c2: '#1a1a1a', teams: 6,  swish: '123 000 00 61', checked: '22 okt 2026' },
+  hamnen:    { name: 'Hamnens BK',       crest: 'HBK', c1: '#0a4f8a', c2: '#ffffff', teams: 27, swish: '123 000 00 71', checked: '5 okt 2026' },
+  skogsby:   { name: 'Skogsby IF',       crest: 'SIF', c1: '#2e5e2a', c2: '#f4d03f', teams: 12, swish: '123 000 00 81', checked: '29 sep 2026' },
+  kustbyn:   { name: 'Kustbyns FF',      crest: 'KFF', c1: '#0b7fb3', c2: '#ffffff', teams: 16, swish: '123 000 00 91', checked: '11 okt 2026' },
+};
+
+/* kak: what the team usually sells instead — items per player and profit per item */
+const GOALS = [
+  { id: 'g0', club: 'solbacka', team: 'P19 Blå', city: 'Stockholm', dist: 1.2, players: 10, status: 'club', by: 'Erik Holm',
+    title: 'Resa till Paris', desc: 'Laget vill åka på en ungdomsturnering utanför Paris i maj. 5 000 kr täcker bussen till och från flygplatsen och en gemensam middag.',
+    target: 5000, raised: 0, pending: 0, deadline: '2027-04-15', msg: 'P19 Bla Paris', update: 'Insamlingen har precis startat!',
+    kak: { items: 10, profit: 50, thing: 'kakburkar' }, supporters: [], count: 0 },
+  { id: 'g1', club: 'solbacka', team: 'P14', city: 'Stockholm', dist: 1.2, players: 9, status: 'live',
+    title: 'Cupresa till Barcelona', desc: '18 spelare vill åka på Costa Brava Cup i påsk. Pengarna går till flyg och boende så att alla kan följa med, oavsett hemekonomi.',
+    target: 60000, raised: 37600, pending: 800, deadline: '2027-03-15', msg: 'P14 Barcelona', update: 'Vi har sålt 340 kakburkar hittills. Tack alla som köpt!',
+    kak: { items: 20, profit: 50, thing: 'kakburkar' },
+    supporters: [{ n: 'Maria L.', t: 'i går' }, { n: 'En supporter', t: 'i går' }, { n: 'Johan K.', t: '2 dagar' }, { n: 'Lena B.', t: '3 dagar' }], count: 112 },
+  { id: 'g2', club: 'strand', team: 'P10', city: 'Stockholm', dist: 0.8, players: 10, status: 'live',
+    title: 'Bollar och koner till träningarna', desc: 'Vi tränar 30 barn med 8 bollar. 25 nya bollar i storlek 4 och en uppsättning koner gör varje träning bättre.',
+    target: 6000, raised: 4900, pending: 0, deadline: '2026-11-30', msg: 'P10 Bollar', update: 'Bara 1 100 kr kvar till målet.',
+    supporters: [{ n: 'En supporter', t: '1 tim' }, { n: 'Lena B.', t: '3 tim' }], count: 41 },
+  { id: 'g3', club: 'kvarnbyn', team: 'F12', city: 'Nacka', dist: 3.4, players: 11, status: 'live',
+    title: 'Nya matchställ till hela laget', desc: 'Laget har vuxit från 11 till 22 spelare och tröjorna räcker inte. Målet är matchställ i alla storlekar.',
+    target: 18000, raised: 11250, pending: 300, deadline: '2026-12-20', msg: 'F12 Matchstall', update: 'Vi provade storlekar på träningen i tisdags.',
+    kak: { items: 5, profit: 60, thing: 'Bingolotter' },
+    supporters: [{ n: 'Ahmed R.', t: '4 tim' }, { n: 'En supporter', t: 'i går' }], count: 64 },
+  { id: 'g4', club: 'ekeby', team: 'Knattefotbollen', city: 'Sundbyberg', dist: 6.6, players: 12, status: 'live',
+    title: 'Konstgräs på minifotbollsplanen', desc: 'Grusplanen blir lera varje höst. Med konstgräs kan 200 barn spela året runt. Kommunen står för halva kostnaden.',
+    target: 250000, raised: 92000, pending: 0, deadline: '2027-06-30', msg: 'Knatte Konstgras', update: 'Kommunen har godkänt ansökan om medfinansiering.',
+    supporters: [{ n: 'Sara N.', t: '1 dag' }, { n: 'En supporter', t: '2 dagar' }], count: 287 },
+  { id: 'g5', club: 'lindhagen', team: 'F16', city: 'Solna', dist: 5.1, players: 8, status: 'live',
+    title: 'Gothia Cup i Göteborg', desc: 'Laget har aldrig spelat en stor turnering. Pengarna täcker anmälan, tåg och skolförläggning för 16 spelare.',
+    target: 45000, raised: 12600, pending: 0, deadline: '2027-05-31', msg: 'F16 Gothia', update: 'Anmälan är skickad. Nu samlar vi till resan.',
+    kak: { items: 15, profit: 50, thing: 'kakburkar' },
+    supporters: [{ n: 'Karin W.', t: '6 tim' }], count: 38 },
+  { id: 'g6', club: 'vasterang', team: 'Sommarskolan', city: 'Huddinge', dist: 9.0, players: 10, status: 'live',
+    title: 'Fotbollsskola för alla barn', desc: 'Vi vill att sommarens fotbollsskola ska kosta 0 kr för familjer som inte har råd. 25 000 kr täcker 50 platser.',
+    target: 25000, raised: 17500, pending: 0, deadline: '2027-04-30', msg: 'Sommarskola', update: '35 platser är redan finansierade.',
+    supporters: [{ n: 'En supporter', t: '2 tim' }, { n: 'Olle P.', t: 'i går' }], count: 96 },
+  { id: 'g7', club: 'norrtorp', team: 'Damlaget', city: 'Uppsala', dist: 68, players: 9, status: 'live',
+    title: 'Buss till bortamatcherna 2027', desc: 'Spelarna kör egna bilar till bortamatcher upp till 15 mil bort. En hyrd buss gör resorna säkrare och billigare.',
+    target: 32000, raised: 8000, pending: 0, deadline: '2027-04-01', msg: 'Dam Buss', update: 'Spelarna har startat en loppis i klubbstugan.',
+    supporters: [{ n: 'En supporter', t: '1 dag' }], count: 27 },
+  { id: 'g8', club: 'hamnen', team: 'P15', city: 'Göteborg', dist: 397, players: 10, status: 'live',
+    title: 'Träningsläger i Danmark', desc: 'Fyra dagar med två träningspass om dagen och matcher mot danska lag. Pengarna går till buss, färja och boende.',
+    target: 40000, raised: 21000, pending: 0, deadline: '2027-02-15', msg: 'P15 Danmark', update: 'Lägret är bokat till sportlovet.',
+    kak: { items: 10, profit: 60, thing: 'Bingolotter' },
+    supporters: [{ n: 'Linnea H.', t: '3 tim' }], count: 73 },
+  { id: 'g9', club: 'skogsby', team: 'F13', city: 'Umeå', dist: 512, players: 9, status: 'live',
+    title: 'Inomhustider i vinter', desc: 'Vintern är lång i Umeå. Hyra av inomhushall varannan helg i fyra månader gör att laget kan fortsätta träna.',
+    target: 15000, raised: 3200, pending: 0, deadline: '2026-12-31', msg: 'F13 Inomhus', update: 'Hallen är preliminärbokad från december.',
+    supporters: [{ n: 'Erik J.', t: '5 tim' }], count: 22 },
+  { id: 'g10', club: 'kustbyn', team: 'P12', city: 'Malmö', dist: 513, players: 11, status: 'live',
+    title: 'Målvaktsutrustning', desc: 'Tre målvakter delar på ett par handskar. Nya handskar, tröjor och byxor med skydd till alla som vill stå i mål.',
+    target: 8000, raised: 6900, pending: 0, deadline: '2026-12-15', msg: 'P12 Malvakt', update: 'Handskarna är beställda, nu fattas tröjorna.',
+    supporters: [{ n: 'En supporter', t: '30 min' }, { n: 'Fatima A.', t: '4 tim' }], count: 58 },
+];
+const byId = Object.fromEntries(GOALS.map(g => [g.id, g]));
+
+/* "Jag har swishat" reports waiting for the team leader to match against the Swish report */
+const REPORTS = [
+  { id: 'r1', goal: 'g1', name: 'Maria L.', amount: 200, t: 'i går 19:42' },
+  { id: 'r2', goal: 'g1', name: 'En supporter', amount: 500, t: 'i går 12:05' },
+  { id: 'r3', goal: 'g1', name: 'Johan K.', amount: 100, t: 'mån 08:30' },
+];
+
+const LEADER = { name: 'Erik Holm', club: 'solbacka', teams: ['P14', 'P19 Blå'] };
+const ADMIN = { name: 'Lisa Grahn', role: 'kassör', club: 'solbacka' };
+const INVITES = [];
+
+let radius = '10', query = '', role = 'leader';
+const seen = new Set();
+const saved = [];
+const given = {};      // goal id -> kr this visitor reported
+const shownAs = {};    // goal id -> name shown
+let give = null, share = null, toastTimer = null;
+
+const $ = id => document.getElementById(id);
+const kr = n => n.toLocaleString('sv-SE') + ' kr';
+const pct = g => Math.min(100, Math.round(g.raised / g.target * 100));
+const pctAll = g => Math.min(100, Math.round((g.raised + g.pending) / g.target * 100));
+const daysLeft = g => Math.max(0, Math.ceil((new Date(g.deadline) - Date.now()) / 864e5));
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const clubOf = g => CLUBS[g.club];
+const distLabel = g => g.dist < 20 ? `${g.dist.toLocaleString('sv-SE')} km · ${g.city}` : `${g.city} · ${Math.round(g.dist)} km`;
+const slug = s => s.toLowerCase().replace(/å|ä/g, 'a').replace(/ö/g, 'o').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+const shareLink = g => `laglyftet.se/${slug(clubOf(g).name)}-${slug(g.team)}`;
+const kakSum = g => g.kak ? g.kak.items * g.kak.profit : 0;
+const live = () => GOALS.filter(g => g.status === 'live');
+const initials = n => n === 'En supporter' ? '?' : n.split(' ').map(p => p[0]).join('').slice(0, 2);
+
+const ICON = {
+  verified: '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2l2.4 2.1 3.2-.3.9 3.1 2.8 1.6-1.1 3 1.1 3-2.8 1.6-.9 3.1-3.2-.3L12 22l-2.4-2.1-3.2.3-.9-3.1-2.8-1.6 1.1-3-1.1-3 2.8-1.6.9-3.1 3.2.3Z"/><path d="m8.5 12 2.4 2.4 4.6-4.8" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7"/></svg>',
+  info: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/></svg>',
+  cookie: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 3a9 9 0 1 0 9 9 3 3 0 0 1-3-3 3 3 0 0 1-3-3 3 3 0 0 1-3-3Z"/><circle cx="8.5" cy="11" r="1" fill="currentColor"/><circle cx="12" cy="16" r="1" fill="currentColor"/><circle cx="15.5" cy="13" r="1" fill="currentColor"/></svg>',
+  qr: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3M21 14v7h-4M14 18v3"/></svg>',
+};
+
+/* Crest and illustrated team photo (players seen from behind, so no faces are shown) */
+function crest(c) {
+  const long = c.crest.length > 2;
+  return `<svg class="crest" viewBox="0 0 64 66" aria-hidden="true">
+    <path d="M32 3 59 11v21c0 16-11.5 27-27 31C16.5 59 5 48 5 32V11Z" fill="${c.c2}" stroke="${c.c1}" stroke-width="3"/>
+    <text x="32" y="${long ? 40 : 42}" text-anchor="middle" font-family="Barlow Condensed, Arial Narrow, sans-serif" font-weight="700" font-size="${long ? 21 : 26}" fill="${c.c1}">${c.crest}</text></svg>`;
+}
+
+const HAIR = ['#2b1d14', '#5a3a22', '#c9a26b', '#8a5a2b', '#141414', '#d8b56d', '#6b4226'];
+const NUMS = [7, 10, 4, 9, 11, 3, 5, 8, 2, 6, 14, 12, 15, 16];
+function player(x, base, s, c, i) {
+  const hair = HAIR[(i * 3 + c.crest.length) % HAIR.length];
+  const shorts = c.c2 === '#ffffff' || c.c2 === '#f2f2f2' ? '#1b1b1b' : c.c2;
+  return `<g transform="translate(${x} ${base}) scale(${s})">
+    <rect x="-10" y="-28" width="8" height="28" rx="2" fill="${c.c1}"/><rect x="2" y="-28" width="8" height="28" rx="2" fill="${c.c1}"/>
+    <rect x="-13" y="-46" width="26" height="20" rx="4" fill="${shorts}"/>
+    <rect x="-23" y="-84" width="8" height="32" rx="4" fill="${c.c1}"/><rect x="15" y="-84" width="8" height="32" rx="4" fill="${c.c1}"/>
+    <rect x="-17" y="-88" width="34" height="46" rx="10" fill="${c.c1}"/>
+    <text x="0" y="-55" text-anchor="middle" font-family="Barlow Condensed, Arial Narrow, sans-serif" font-weight="700" font-size="20" fill="${c.c2}">${NUMS[i % NUMS.length]}</text>
+    <rect x="-5" y="-94" width="10" height="8" fill="#c99a78"/>
+    <circle cx="0" cy="-102" r="12" fill="${hair}"/>
+  </g>`;
+}
+function teamPhoto(g) {
+  const c = clubOf(g), n = g.players, back = Math.floor(n / 2), front = n - back;
+  // Back row sits in the gaps between front-row players
+  const row = (count, base, s, isBack) => Array.from({ length: count }, (_, i) => {
+    const x = isBack ? 400 * (i + 1) / (count + 1) : 400 * (i + .5) / count;
+    return player(x, base, s, c, i + (isBack ? 20 : 0));
+  }).join('');
+  const stripes = Array.from({ length: 6 }, (_, i) => `<rect x="0" y="${118 + i * 20}" width="400" height="20" fill="${i % 2 ? '#3a8546' : '#43924f'}"/>`).join('');
+  return `<svg class="photo" viewBox="0 0 400 230" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Lagbild: ${esc(c.name)} ${esc(g.team)}, fotograferade bakifrån">
+    <defs><linearGradient id="sky-${g.id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8fb8d4"/><stop offset="1" stop-color="#f1dcae"/></linearGradient></defs>
+    <rect width="400" height="130" fill="url(#sky-${g.id})"/>
+    <path d="M0 112 L18 92 L30 104 L46 84 L62 104 L80 90 L96 106 L120 88 L140 104 L160 86 L182 102 L204 90 L226 106 L250 84 L270 104 L292 92 L312 106 L334 88 L356 104 L378 90 L400 102 V122 H0Z" fill="#2c4a33"/>
+    ${stripes}
+    <path d="M0 150 H400" stroke="#fff" stroke-opacity=".55" stroke-width="2"/>
+    <ellipse cx="200" cy="150" rx="70" ry="14" fill="none" stroke="#fff" stroke-opacity=".45" stroke-width="2"/>
+    ${row(back, 200, .86, true)}
+    ${row(front, 252, 1.05, false)}
+  </svg>`;
+}
+
+function barHTML(g, okW = pct(g), pendW = pctAll(g) - pct(g)) {
+  return `<div class="bar"><span class="ok" style="width:${okW}%"></span><span class="pend" style="width:${pendW}%"></span></div>`;
+}
+function moneyBlock(g) {
+  return `<div class="money">
+    ${barHTML(g)}
+    <div class="nums"><b>${kr(g.raised + g.pending)}</b><small>av ${kr(g.target)}</small><span class="pct">${pctAll(g)} %</span></div>
+    ${g.pending ? `<span class="pend-note"><i></i>${kr(g.pending)} väntar på avstämning mot Swish</span>` : ''}
+  </div>`;
+}
+
+/* Deck */
+function deckList() {
+  return live().filter(g => (radius === 'all' || g.dist <= +radius) && !seen.has(g.id)).sort((a, b) => (b.fresh || 0) - (a.fresh || 0) || a.dist - b.dist);
+}
+
+function cardHTML(g) {
+  const c = clubOf(g);
+  return `<div class="photo-wrap">
+      ${teamPhoto(g)}
+      <div class="chip-row"><div class="chips"><span class="chip">${esc(distLabel(g))}</span>${g.fresh ? '<span class="chip new">Nytt</span>' : ''}</div><button class="info-btn" data-info="${g.id}" aria-label="Mer om målet">${ICON.info}</button></div>
+      <div class="stamp yes">STÖD</div><div class="stamp no">NÄSTA</div>
+      <div class="crest-badge">${crest(c)}</div>
+    </div>
+    <div class="body">
+      <p class="club">${esc(c.name)} · ${esc(g.team)} ${ICON.verified}</p>
+      <h2 class="goal">${esc(g.title)}</h2>
+      ${g.kak ? `<p class="kak-line">${ICON.cookie}Slipp sälja ${g.kak.items} ${esc(g.kak.thing)}: swisha ${kr(kakSum(g))}</p>` : `<p class="desc">${esc(g.desc)}</p>`}
+      ${moneyBlock(g)}
+      <div class="meta"><span><strong>${g.count}</strong> stöttar</span><span><strong>${daysLeft(g)}</strong> dagar kvar</span></div>
+    </div>`;
+}
+
+function renderDeck() {
+  const deck = $('deck'), list = deckList();
+  deck.innerHTML = '';
+  ['btn-skip', 'btn-give', 'btn-like'].forEach(id => $(id).disabled = !list.length);
+  if (!list.length) {
+    const opts = [...$('radius').options].map(o => o.value);
+    const next = opts[opts.indexOf(radius) + 1];
+    const label = $('radius').selectedOptions[0].textContent;
+    deck.innerHTML = next
+      ? `<div class="empty"><h2>Inga fler mål inom ${label}</h2><p>Du har sett alla insamlingar nära dig. Vill du se lag längre bort?</p>
+         <button class="btn" id="widen">Visa ${next === 'all' ? 'hela Sverige' : 'inom ' + next + ' km'}</button></div>`
+      : `<div class="empty"><h2>Du har sett alla mål</h2><p>Det finns inga fler insamlingar i Sverige just nu. Kolla Mina lag eller börja om.</p>
+         <button class="btn" id="restart">Börja om</button></div>`;
+    if (next) $('widen').onclick = () => { radius = next; $('radius').value = next; renderDeck(); };
+    else $('restart').onclick = () => { seen.clear(); radius = '10'; $('radius').value = '10'; renderDeck(); };
+    return;
+  }
+  list.slice(0, 3).reverse().forEach((g, i, arr) => {
+    const depth = arr.length - 1 - i;
+    const el = document.createElement('article');
+    el.className = 'card' + (depth === 0 ? ' top' : '');
+    el.setAttribute('aria-label', `${clubOf(g).name} ${g.team}: ${g.title}`);
+    el.innerHTML = cardHTML(g);
+    el.style.transform = `translateY(${depth * 10}px) scale(${1 - depth * .04})`;
+    if (depth === 2) el.style.opacity = .6;
+    if (depth === 0) attachDrag(el, g);
+    deck.appendChild(el);
+  });
+}
+
+function attachDrag(card, g) {
+  let start = null, dx = 0, moved = false;
+  const yes = card.querySelector('.stamp.yes'), no = card.querySelector('.stamp.no');
+  const info = card.querySelector('.info-btn');
+  info.addEventListener('pointerdown', e => e.stopPropagation());
+  info.addEventListener('click', e => { e.stopPropagation(); openDetail(g); });
+  card.addEventListener('pointerdown', e => {
+    start = { x: e.clientX, y: e.clientY }; dx = 0; moved = false;
+    card.setPointerCapture(e.pointerId);
+    card.style.transition = 'none';
+  });
+  card.addEventListener('pointermove', e => {
+    if (!start) return;
+    dx = e.clientX - start.x;
+    const dy = e.clientY - start.y;
+    if (Math.abs(dx) > 6 || Math.abs(dy) > 6) moved = true;
+    card.style.transform = `translate(${dx}px, ${dy * .25}px) rotate(${dx / 18}deg)`;
+    yes.style.opacity = Math.max(0, Math.min(1, dx / 90));
+    no.style.opacity = Math.max(0, Math.min(1, -dx / 90));
+  });
+  const end = () => {
+    if (!start) return;
+    start = null;
+    card.style.transition = '';
+    if (Math.abs(dx) > 100) decide(dx > 0 ? 'right' : 'left');
+    else {
+      card.style.transform = ''; yes.style.opacity = no.style.opacity = 0;
+      if (!moved) openDetail(g);
+    }
+  };
+  card.addEventListener('pointerup', end);
+  card.addEventListener('pointercancel', end);
+}
+
+function decide(dir) {
+  const g = deckList()[0];
+  const card = $('deck').querySelector('.card.top');
+  if (!g || !card || card.dataset.leaving) return;
+  card.dataset.leaving = '1';
+  card.querySelector(dir === 'right' ? '.stamp.yes' : '.stamp.no').style.opacity = 1;
+  card.style.transition = 'transform .32s ease, opacity .32s ease';
+  card.style.transform = `translate(${dir === 'right' ? 520 : -520}px, 30px) rotate(${dir === 'right' ? 24 : -24}deg)`;
+  card.style.opacity = 0;
+  seen.add(g.id);
+  if (dir === 'right') { save(g); toast(`${clubOf(g).name} ${g.team} är sparat i Mina lag`, 'Swisha nu', () => openGive(g)); }
+  setTimeout(renderDeck, 300);
+}
+
+function save(g) {
+  if (!saved.includes(g.id)) saved.unshift(g.id);
+  $('badge').textContent = saved.length;
+  $('badge').hidden = !saved.length;
+}
+
+/* Search */
+function renderResults() {
+  const q = query.trim().toLowerCase();
+  const searching = q.length > 0;
+  $('deck').hidden = $('actions').hidden = searching;
+  $('results').hidden = !searching;
+  if (!searching) return;
+  const hits = live().filter(g => [clubOf(g).name, g.team, g.city, g.title].join(' ').toLowerCase().includes(q)).sort((a, b) => a.dist - b.dist);
+  $('results').innerHTML = (hits.length ? `<p class="list-sub">${hits.length} träffar i hela Sverige</p>` : '') + (hits.length
+    ? hits.map(g => `<button class="row result" data-open="${g.id}">
+        ${crest(clubOf(g))}
+        <p class="club">${esc(clubOf(g).name)} · ${esc(g.team)}</p>
+        <h3>${esc(g.title)}</h3>
+        ${moneyBlock(g)}
+        <div class="row-foot"><span class="fine">${esc(distLabel(g))}</span><span class="fine">${daysLeft(g)} dagar kvar</span></div>
+      </button>`).join('')
+    : `<p class="list-empty">Ingen förening eller ort matchar "${esc(query)}".<br>Finns ditt lag inte här? Be lagledaren lägga upp ett mål under Lag &amp; förening.</p>`);
+  $('results').querySelectorAll('[data-open]').forEach(b => b.onclick = () => openDetail(byId[b.dataset.open]));
+}
+
+/* Mina lag */
+function renderSaved() {
+  const list = $('saved-list');
+  const total = Object.values(given).reduce((a, b) => a + b, 0);
+  let html = `<h2 class="list-title">Mina lag</h2>`;
+  if (total) html += `<div class="total"><span>Du har swishat totalt</span><b>${kr(total)}</b></div>`;
+  if (!saved.length) {
+    list.innerHTML = html + `<p class="list-empty">Här samlas lagen du stöttar.<br>Swipea höger på ett mål under Upptäck, eller sök efter ditt lag.</p>`;
+    return;
+  }
+  list.innerHTML = html + saved.map(id => {
+    const g = byId[id], c = clubOf(g);
+    return `<div class="row">
+      ${crest(c)}
+      <p class="club">${esc(c.name)} · ${esc(g.team)}</p>
+      <h3>${esc(g.title)}</h3>
+      ${moneyBlock(g)}
+      <p class="latest"><b>Senaste från laget:</b> ${esc(g.update)}</p>
+      <div class="row-foot">
+        <span class="mine">${given[id] ? `Du har swishat ${kr(given[id])} · visas som ${esc(shownAs[id])}` : `${daysLeft(g)} dagar kvar`}</span>
+        <div class="btns"><button class="btn ghost small" data-share="${id}">Dela</button><button class="btn small" data-give="${id}">Swisha</button></div>
+      </div>
+    </div>`;
+  }).join('');
+  list.querySelectorAll('[data-give]').forEach(b => b.onclick = () => openGive(byId[b.dataset.give]));
+  list.querySelectorAll('[data-share]').forEach(b => b.onclick = () => openShare(byId[b.dataset.share]));
+}
+
+/* Tabs */
+function switchTab(name) {
+  ['discover', 'saved', 'team'].forEach(t => {
+    $('view-' + t).hidden = t !== name;
+    $('tab-' + t).setAttribute('aria-selected', t === name);
+  });
+  $('search-row').hidden = name !== 'discover';
+  if (name === 'discover') renderDeck();
+  if (name === 'saved') renderSaved();
+  if (name === 'team') renderTeam();
+  hideToast();
+}
+
+function updateTeamBadge() {
+  const n = GOALS.filter(g => g.status === 'club' && g.club === ADMIN.club).length;
+  $('team-badge').textContent = n;
+  $('team-badge').hidden = !n;
+}
+
+/* Toast */
+function toast(text, actionLabel, action) {
+  $('toast-text').textContent = text;
+  const b = $('toast-btn');
+  b.hidden = !actionLabel;
+  if (actionLabel) { b.textContent = actionLabel; b.onclick = () => { hideToast(); action(); }; }
+  $('toast').classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(hideToast, 4000);
+}
+function hideToast() { $('toast').classList.remove('show'); }
+
+/* Sheet */
+function openSheet(html) {
+  $('sheet-content').innerHTML = html;
+  $('sheet').scrollTop = 0;
+  $('scrim').classList.add('open');
+  $('sheet').classList.add('open');
+}
+function closeSheet() {
+  $('scrim').classList.remove('open');
+  $('sheet').classList.remove('open');
+  if (!$('view-saved').hidden) renderSaved();
+  if (!$('view-team').hidden) renderTeam();
+  if (!$('results').hidden) renderResults();
+}
+
+function openDetail(g) {
+  const c = clubOf(g);
+  const sup = g.supporters.slice(0, 5).map(s => `<li><span class="avatar">${initials(s.n)}</span>${esc(s.n)}<time>${s.t}</time></li>`).join('');
+  openSheet(`
+    <div class="detail-photo">${teamPhoto(g)}<div class="crest-badge">${crest(c)}</div></div>
+    <p class="eyebrow">${esc(c.name)} · ${esc(g.team)} · ${esc(g.city)}</p>
+    <h3 class="big" id="sheet-title">${esc(g.title)}</h3>
+    <p class="sub">${esc(g.desc)}</p>
+    ${moneyBlock(g)}
+    <div class="trust">
+      <span class="pill">${ICON.check.replace('<svg', '<svg width="12" height="12"')}Föreningens eget Swish-nummer</span>
+      <span class="pill">Godkänt av ${esc(c.name)}</span>
+      <span class="pill">Kontrollerad av Laglyftet ${c.checked}</span>
+    </div>
+    <p class="earmark">Pengarna går till <b>${esc(c.name)}</b> och förs till <b>${esc(g.team)}s lagkassa</b> för "${esc(g.title)}". Laget berättar vad pengarna gick till när målet är avslutat.</p>
+    <p class="latest"><b>Senaste från laget:</b> ${esc(g.update)}</p>
+    ${sup ? `<div><p class="label" style="margin-bottom:8px">Senaste supportrar · ${g.count} totalt</p><ul class="supporters">${sup}</ul></div>` : ''}
+    <button class="primary" id="d-give">Swisha till laget</button>
+    <button class="secondary" id="d-share">Dela målet</button>`);
+  $('d-give').onclick = () => openGive(g);
+  $('d-share').onclick = () => openShare(g);
+}
+
+/* Give flow: Swish opens prefilled with the club's number, amount and message */
+function openGive(g) {
+  give = { g, amount: g.kak ? kakSum(g) : 100, kak: !!g.kak, anon: true, name: '' };
+  hideToast();
+  renderGive();
+}
+
+function renderGive() {
+  const { g } = give, c = clubOf(g);
+  openSheet(`
+    <p class="eyebrow">Swisha till</p>
+    <h3 class="big" id="sheet-title">${esc(c.name)} · ${esc(g.team)}</h3>
+    <p class="sub">${esc(g.title)} · ${kr(Math.max(0, g.target - g.raised - g.pending))} kvar till målet</p>
+    ${g.kak ? `<div class="kak-offer">
+      <b class="h">Slipp ${esc(g.kak.thing.toLowerCase())}na</b>
+      <span>Varje spelare brukar sälja ${g.kak.items} ${esc(g.kak.thing)} och laget tjänar ${g.kak.profit} kr per styck. Swisha ${kr(kakSum(g))} i stället, så får laget lika mycket.</span>
+      <button id="kak-btn" aria-pressed="${give.kak}">Swisha min del: ${kr(kakSum(g))}</button>
+    </div>` : ''}
+    <div><p class="label" style="margin-bottom:6px">${g.kak ? 'Eller välj ett eget belopp' : 'Belopp'}</p>
+      <div class="amounts">${[50, 100, 200, 500].map(a => `<button class="amt" data-amt="${a}" aria-pressed="${!give.kak && a === give.amount}">${a} kr</button>`).join('')}</div></div>
+    <div class="field"><label for="custom-amount">Annat belopp (minst 20 kr)</label><input id="custom-amount" inputmode="numeric" placeholder="T.ex. 300"><span class="err" id="amt-err" hidden>Minsta belopp är 20 kr.</span></div>
+    <fieldset><legend>Hur vill du synas i appen?</legend><div class="opts">
+      <label class="opt"><input type="radio" name="vis" value="anon" id="vis-anon" ${give.anon ? 'checked' : ''}><span>Anonym<small>Visas som "En supporter"</small></span></label>
+      <label class="opt"><input type="radio" name="vis" value="name" id="vis-name" ${give.anon ? '' : 'checked'}><span>Med namn<small>Du skriver själv vad som visas</small></span></label>
+    </div></fieldset>
+    <div class="field" id="name-field" ${give.anon ? 'hidden' : ''}><label for="giver-name">Namn som visas</label><input id="giver-name" maxlength="30" placeholder="T.ex. Farmor Birgitta" value="${esc(give.name)}"></div>
+    <p class="fine">Laglyftet vet aldrig vem som betalar. Föreningen ser avsändaren i sin Swish-rapport, som vanligt.</p>
+    <button class="primary" id="pay-btn"></button>`);
+
+  const refresh = () => {
+    const ok = give.amount >= 20;
+    $('amt-err').hidden = ok || !$('custom-amount').value;
+    $('pay-btn').textContent = ok ? `Öppna Swish: ${kr(give.amount)}` : 'Välj ett belopp';
+    $('pay-btn').disabled = !ok;
+    if ($('kak-btn')) $('kak-btn').setAttribute('aria-pressed', give.kak);
+  };
+  const clearAmt = () => document.querySelectorAll('[data-amt]').forEach(x => x.setAttribute('aria-pressed', false));
+  if ($('kak-btn')) $('kak-btn').onclick = () => { give.kak = true; give.amount = kakSum(g); $('custom-amount').value = ''; clearAmt(); refresh(); };
+  document.querySelectorAll('[data-amt]').forEach(b => b.onclick = () => {
+    give.kak = false; give.amount = +b.dataset.amt; $('custom-amount').value = '';
+    clearAmt(); b.setAttribute('aria-pressed', true);
+    refresh();
+  });
+  $('custom-amount').oninput = e => {
+    e.target.value = e.target.value.replace(/\D/g, '').slice(0, 6);
+    give.kak = false; give.amount = +e.target.value || 0;
+    clearAmt();
+    refresh();
+  };
+  document.querySelectorAll('input[name="vis"]').forEach(r => r.onchange = () => {
+    give.anon = r.value === 'anon';
+    $('name-field').hidden = give.anon;
+    if (!give.anon) $('giver-name').focus();
+  });
+  $('giver-name').oninput = e => give.name = e.target.value;
+  $('pay-btn').onclick = renderSwish;
+  refresh();
+}
+
+function renderSwish() {
+  const { g, amount } = give, c = clubOf(g);
+  openSheet(`
+    <p class="eyebrow">Swish öppnas med allt ifyllt</p>
+    <h3 class="big" id="sheet-title">Kontrollera och godkänn</h3>
+    <div class="swishbox">
+      <div><span>Mottagare</span><span>${esc(c.name)}</span></div>
+      <div><span>Swish-nummer</span><span>${c.swish} (påhittat)</span></div>
+      <div><span>Belopp</span><span>${kr(amount)}</span></div>
+      <div><span>Meddelande</span><span>${esc(g.msg)}</span></div>
+    </div>
+    <p class="note">Kolla att mottagaren i Swish heter <b>${esc(c.name)}</b>. Laglyftet ber aldrig om Swish till ett privat 07-nummer.</p>
+    <div class="qr">${ICON.qr}<span>Sitter du vid datorn? Här visas en QR-kod med allt ifyllt som du skannar med Swish i mobilen.</span></div>
+    <button class="primary" id="done-swish">Jag har swishat</button>
+    <button class="secondary" id="back-swish">Tillbaka</button>
+    <p class="fine" style="text-align:center">I prototypen öppnas inte Swish. Tryck "Jag har swishat" för att se nästa steg.</p>`);
+  $('back-swish').onclick = renderGive;
+  $('done-swish').onclick = reportSwish;
+}
+
+function reportSwish() {
+  const { g, amount } = give, c = clubOf(g);
+  const name = give.anon || !give.name.trim() ? 'En supporter' : give.name.trim();
+  const beforeOk = pct(g), beforeAll = pctAll(g);
+  g.pending += amount;
+  if (!given[g.id]) g.count++;
+  given[g.id] = (given[g.id] || 0) + amount;
+  shownAs[g.id] = name;
+  g.supporters.unshift({ n: name, t: 'nyss' });
+  REPORTS.unshift({ id: 'r' + Date.now(), goal: g.id, name, amount, t: 'nyss', mine: true });
+  save(g);
+  openSheet(`<div class="state">
+    <div class="check">${ICON.check}</div>
+    <h3 class="big" id="sheet-title" style="margin:0">Tack för ditt stöd!</h3>
+    <p class="sub">${kr(amount)} till ${esc(c.name)} ${esc(g.team)}${give.kak ? `. Nu slipper du sälja ${esc(g.kak.thing.toLowerCase())}` : ''}. Du visas som <b>${esc(name)}</b>.</p>
+    <div class="money">${barHTML(g, beforeOk, beforeAll - beforeOk)}
+      <span class="pend-note"><i></i>Ditt bidrag syns direkt och bekräftas när lagledaren stämt av mot Swish.</span></div>
+    <button class="primary" id="share-btn">Dela och få fler att swisha</button>
+    <button class="secondary" id="done-btn">Klart</button>
+  </div>`);
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    const pend = $('sheet-content').querySelector('.bar .pend');
+    if (pend) pend.style.width = (pctAll(g) - pct(g)) + '%';
+  }));
+  $('share-btn').onclick = () => openShare(g);
+  $('done-btn').onclick = () => { closeSheet(); renderDeck(); };
+}
+
+/* Share */
+function openShare(g) {
+  const hasGift = !!given[g.id];
+  const named = hasGift && shownAs[g.id] !== 'En supporter';
+  share = { name: named, amount: false };
+  const c = clubOf(g);
+  openSheet(`
+    <p class="eyebrow">Dela</p>
+    <h3 class="big" id="sheet-title">${hasGift ? 'Få fler att swisha' : 'Tipsa om målet'}</h3>
+    <div class="story" id="story"></div>
+    <div class="switches">
+      <label class="switch" for="sw-name">Visa mitt namn<input type="checkbox" id="sw-name" ${share.name ? 'checked' : ''} ${named ? '' : 'disabled'}></label>
+      <label class="switch" for="sw-amount">Visa beloppet jag swishade<input type="checkbox" id="sw-amount" ${hasGift ? '' : 'disabled'}></label>
+    </div>
+    ${hasGift && !named ? '<p class="fine">Du swishade anonymt, så inget namn visas i delningen.</p>' : ''}
+    <div class="share-btns">
+      <button data-net="Instagram">Instagram</button><button data-net="Facebook">Facebook</button><button id="copy-link">Kopiera länk</button>
+    </div>
+    <p class="link" id="link-text">${shareLink(g)}</p>
+    <p class="fine" style="text-align:center">Exempellänk. Laget kan också skriva ut en affisch med QR-kod till klubbstugan.</p>`);
+  const draw = () => {
+    const who = hasGift ? (share.name ? shownAs[g.id] : 'En supporter') + ' stöttar' : 'Stötta';
+    $('story').innerHTML = `${teamPhoto(g)}<div class="shade"></div><div class="crest-badge">${crest(c)}</div>
+      <div class="story-text">
+        <span class="s1">${esc(who)} ${esc(c.name)} ${esc(g.team)}${share.amount ? ` med ${kr(given[g.id])}` : ''}</span>
+        <span class="s2">${esc(g.title)}</span>
+        ${barHTML(g)}
+        <span class="s3">${kr(g.raised + g.pending)} av ${kr(g.target)} · ${daysLeft(g)} dagar kvar</span>
+        <span class="brand">Laglyftet</span>
+      </div>`;
+  };
+  $('sw-name').onchange = e => { share.name = e.target.checked; draw(); };
+  $('sw-amount').onchange = e => { share.amount = e.target.checked; draw(); };
+  document.querySelectorAll('[data-net]').forEach(b => b.onclick = () => toast(`I appen öppnas ${b.dataset.net} med bilden och länken.`));
+  $('copy-link').onclick = () => {
+    const text = 'https://' + shareLink(g);
+    const fallback = () => { getSelection().selectAllChildren($('link-text')); toast('Markerad. Kopiera med Cmd/Ctrl + C.'); };
+    try { navigator.clipboard.writeText(text).then(() => toast('Länken är kopierad'), fallback); } catch (e) { fallback(); }
+  };
+  draw();
+}
+
+/* Lag & förening */
+function stepsHTML(g) {
+  const s = g.status;
+  const step = (cls, title, sub) => `<li class="${cls}"><span class="dot">${cls === 'done' ? ICON.check : ''}</span><span>${title}${sub ? `<small>${sub}</small>` : ''}</span></li>`;
+  const invited = s === 'invite';
+  return `<ol class="steps">
+    ${step('done', 'Målet är skapat', `av ${esc(g.by || LEADER.name)}`)}
+    ${invited
+      ? step('now', 'Föreningen registrerar sig', 'Inbjudan är skickad till kansliet') + step('later', 'Laglyftet kontrollerar föreningen', 'Görs en gång per förening') + step('later', 'Föreningen godkänner målet', '')
+      : step(s === 'club' ? 'now' : 'done', 'Föreningen godkänner', s === 'club' ? `Väntar på ${esc(clubOf(g).name)}` : `Godkänt av ${esc(ADMIN.name)}, ${ADMIN.role}`)}
+    ${step(s === 'live' ? 'done' : 'later', 'Publicerat i Laglyftet', s === 'live' ? 'Syns för alla under Upptäck' : '')}
+  </ol>`;
+}
+
+function renderTeam() {
+  updateTeamBadge();
+  const v = $('team-view');
+  const seg = `<div class="seg" role="group" aria-label="Visa som">
+      <button data-role="leader" aria-pressed="${role === 'leader'}">Lagledare</button>
+      <button data-role="club" aria-pressed="${role === 'club'}">Föreningen</button>
+    </div>`;
+  v.innerHTML = seg + (role === 'leader' ? leaderHTML() : clubHTML());
+  v.querySelectorAll('[data-role]').forEach(b => b.onclick = () => { role = b.dataset.role; renderTeam(); v.scrollTop = 0; });
+  if (role === 'leader') wireLeader(); else wireClub();
+}
+
+function leaderHTML() {
+  const mine = GOALS.filter(g => g.club === LEADER.club && LEADER.teams.includes(g.team) || g.mine);
+  const reps = REPORTS.filter(r => mine.some(g => g.id === r.goal));
+  const c = CLUBS[LEADER.club];
+  return `
+    <div class="persona"><span class="avatar">EH</span><span><b>${LEADER.name}</b>Lagledare för ${LEADER.teams.join(' och ')} i ${c.name} (exempel)</span></div>
+
+    <div class="panel"><h3>Mina mål</h3>
+      ${mine.map(g => `<div class="row" style="border:0;padding:0">
+        ${crest(clubOf(g))}
+        <p class="club">${esc(clubOf(g).name)} · ${esc(g.team)}</p>
+        <h3>${esc(g.title)} · ${kr(g.target)}</h3>
+        ${g.status === 'live' ? moneyBlock(g) : ''}
+        <div class="full">${stepsHTML(g)}</div>
+      </div>`).join('<hr style="border:0;border-top:1px solid var(--line);margin:4px 0">')}
+    </div>
+
+    <div class="panel"><h3>Stäm av mot Swish <small>${reps.length} inrapporterade</small></h3>
+      ${reps.length ? `<p class="fine">Jämför med föreningens Swish-rapport. Bekräfta det som har kommit in.</p>
+        <div>${reps.map(r => `<div class="report"><span>${esc(r.name)}<small>${esc(byId[r.goal].team)} · ${esc(byId[r.goal].msg)} · ${r.t}</small></span><span class="num">${kr(r.amount)}</span>
+          <div class="btns"><button class="btn small" data-confirm="${r.id}">Bekräfta</button><button class="btn ghost small" data-missing="${r.id}">Hittar inte</button></div></div>`).join('')}</div>
+        <button class="btn ghost" id="confirm-all">Bekräfta alla</button>`
+      : '<p class="fine">Allt är avstämt. Snyggt!</p>'}
+    </div>
+
+    <div class="panel"><h3>Skapa ett nytt mål</h3>
+      <form class="form" id="goal-form" novalidate>
+        <div class="two">
+          <div class="field"><label for="ng-club">Förening</label><select id="ng-club">
+            ${Object.entries(CLUBS).map(([k, x]) => `<option value="${k}" ${k === LEADER.club ? 'selected' : ''}>${esc(x.name)}</option>`).join('')}
+            <option value="new">Min förening finns inte här</option></select></div>
+          <div class="field"><label for="ng-team">Lag</label><input id="ng-team" placeholder="T.ex. F15 Röd"></div>
+        </div>
+        <div class="sub-box" id="invite-box" hidden>
+          <p class="fine">Bjud in din förening. Kansliet registrerar föreningen och föreningens Swish-nummer, och Laglyftet kontrollerar föreningen en gång.</p>
+          <div class="two">
+            <div class="field"><label for="ng-clubname">Föreningens namn</label><input id="ng-clubname" placeholder="T.ex. Haninge Södra IF"></div>
+            <div class="field"><label for="ng-clubmail">Kansliets e-post</label><input id="ng-clubmail" type="email" placeholder="kansli@exempel.se"></div>
+          </div>
+        </div>
+        <div class="field"><label for="ng-title">Vad samlar ni till?</label><input id="ng-title" maxlength="50" placeholder="T.ex. Resa till Paris"></div>
+        <div class="two">
+          <div class="field"><label for="ng-amount">Belopp (minst 500 kr)</label><input id="ng-amount" inputmode="numeric" placeholder="5000"></div>
+          <div class="field"><label for="ng-date">Slutdatum</label><input id="ng-date" type="date"></div>
+        </div>
+        <label class="consent"><input type="checkbox" id="ng-kak"><span><b>Erbjud "Swisha din del"</b> för dem som hellre swishar än säljer kakor eller lotter.</span></label>
+        <div class="sub-box" id="kak-box" hidden>
+          <div class="three">
+            <div class="field"><label for="ng-thing">Vad säljer ni?</label><input id="ng-thing" value="kakburkar"></div>
+            <div class="field"><label for="ng-items">Antal per spelare</label><input id="ng-items" inputmode="numeric" value="10"></div>
+            <div class="field"><label for="ng-profit">Vinst per styck</label><input id="ng-profit" inputmode="numeric" value="50"></div>
+          </div>
+          <p class="fine" id="kak-preview"></p>
+        </div>
+        <div class="field"><label for="ng-photo">Lagbild (valfri)</label><input id="ng-photo" type="file" accept="image/*"></div>
+        <p class="note">Tips: ta bilden bakifrån eller på utrustningen. Då syns inga ansikten och inga barn med skyddad identitet kan pekas ut.</p>
+        <label class="consent"><input type="checkbox" id="ng-c1"><span>Vi har samtycke från vårdnadshavare för alla barn som syns på bilden.</span></label>
+        <label class="consent"><input type="checkbox" id="ng-c2"><span>Inget barn med skyddade personuppgifter går att känna igen på bilden.</span></label>
+        <span class="err" id="ng-err" hidden></span>
+        <button class="btn" type="submit">Skicka till föreningen för godkännande</button>
+      </form>
+    </div>`;
+}
+
+function wireLeader() {
+  const confirm = id => {
+    const r = REPORTS.find(x => x.id === id), g = byId[r.goal];
+    g.pending -= r.amount; g.raised += r.amount;
+    REPORTS.splice(REPORTS.indexOf(r), 1);
+  };
+  document.querySelectorAll('[data-confirm]').forEach(b => b.onclick = () => { confirm(b.dataset.confirm); toast('Bekräftat. Beloppet räknas nu som inkommet.'); renderTeam(); });
+  document.querySelectorAll('[data-missing]').forEach(b => b.onclick = () => {
+    const r = REPORTS.find(x => x.id === b.dataset.missing), g = byId[r.goal];
+    g.pending -= r.amount;
+    REPORTS.splice(REPORTS.indexOf(r), 1);
+    toast('Borttaget. Givaren får veta att betalningen inte hittades.'); renderTeam();
+  });
+  if ($('confirm-all')) $('confirm-all').onclick = () => {
+    const mineIds = new Set(GOALS.filter(g => LEADER.teams.includes(g.team) || g.mine).map(g => g.id));
+    REPORTS.filter(r => mineIds.has(r.goal)).map(r => r.id).forEach(confirm);
+    toast('Alla inrapporterade swishar är bekräftade.'); renderTeam();
+  };
+  const kakPreview = () => {
+    const items = +$('ng-items').value || 0, profit = +$('ng-profit').value || 0;
+    $('kak-preview').textContent = `Givarna ser: "Slipp sälja ${items} ${$('ng-thing').value || 'saker'}: swisha ${kr(items * profit)}".`;
+  };
+  $('ng-club').onchange = e => $('invite-box').hidden = e.target.value !== 'new';
+  $('ng-kak').onchange = e => { $('kak-box').hidden = !e.target.checked; kakPreview(); };
+  ['ng-thing', 'ng-items', 'ng-profit'].forEach(id => $(id).oninput = kakPreview);
+  $('goal-form').onsubmit = e => {
+    e.preventDefault();
+    const clubKey = $('ng-club').value, isNew = clubKey === 'new';
+    const team = $('ng-team').value.trim(), title = $('ng-title').value.trim();
+    const amount = +$('ng-amount').value.replace(/\D/g, ''), date = $('ng-date').value;
+    const err = isNew && !$('ng-clubname').value.trim() ? 'Skriv föreningens namn.'
+      : isNew && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test($('ng-clubmail').value.trim()) ? 'Skriv kansliets e-postadress.'
+      : !team ? 'Skriv vilket lag det gäller.'
+      : !title ? 'Skriv vad ni samlar till.'
+      : !(amount >= 500) ? 'Beloppet måste vara minst 500 kr.'
+      : !date || new Date(date) <= new Date() ? 'Välj ett slutdatum framåt i tiden.'
+      : $('ng-photo').files.length && !($('ng-c1').checked && $('ng-c2').checked) ? 'Bekräfta båda punkterna om lagbilden.'
+      : null;
+    if (err) { $('ng-err').textContent = err; $('ng-err').hidden = false; return; }
+    let key = clubKey;
+    if (isNew) {
+      const name = $('ng-clubname').value.trim();
+      key = 'new' + Date.now();
+      CLUBS[key] = { name, crest: name.split(' ').map(p => p[0]).join('').slice(0, 3).toUpperCase(), c1: '#444c56', c2: '#ffffff', teams: 1, swish: 'ej registrerat', checked: '' };
+      INVITES.push({ name, mail: $('ng-clubmail').value.trim() });
+    }
+    const g = {
+      id: 'n' + Date.now(), club: key, team, city: 'Stockholm', dist: 2, players: 9, mine: true, by: LEADER.name,
+      status: isNew ? 'invite' : 'club', title, desc: `${team} samlar till: ${title}.`, target: amount, raised: 0, pending: 0,
+      deadline: date, msg: `${team} ${title}`.slice(0, 50), update: 'Insamlingen har precis startat!', supporters: [], count: 0,
+      kak: $('ng-kak').checked ? { items: +$('ng-items').value || 0, profit: +$('ng-profit').value || 0, thing: $('ng-thing').value || 'saker' } : null,
+    };
+    GOALS.push(g); byId[g.id] = g;
+    toast(isNew ? `Inbjudan till ${CLUBS[key].name} är skapad. I prototypen skickas inget mejl.` : `Skickat till ${CLUBS[key].name} för godkännande.`);
+    renderTeam();
+    $('team-view').scrollTop = 0;
+  };
+}
+
+function clubHTML() {
+  const c = CLUBS[ADMIN.club];
+  const waiting = GOALS.filter(g => g.club === ADMIN.club && g.status === 'club');
+  const liveGoals = GOALS.filter(g => g.club === ADMIN.club && g.status === 'live');
+  return `
+    <div class="persona"><span class="avatar">LG</span><span><b>${ADMIN.name}</b>Kassör i ${c.name} (exempel)</span></div>
+
+    <div class="panel">
+      <div class="club-head">${crest(c)}<div><h2>${esc(c.name)}</h2><p>${c.teams} lag · Swish ${c.swish} (påhittat)</p></div></div>
+      <ol class="steps">
+        <li class="done"><span class="dot">${ICON.check}</span><span>Föreningen är registrerad<small>Av kansliet, med föreningens officiella e-post</small></span></li>
+        <li class="done"><span class="dot">${ICON.check}</span><span>Kontrollerad av Laglyftet ${c.checked}<small>Samtal till kansliet. Swish-numret visar föreningens namn</small></span></li>
+      </ol>
+    </div>
+
+    <div class="panel"><h3>Godkänn nya mål <small>${waiting.length} väntar</small></h3>
+      ${waiting.length ? waiting.map(g => `<div class="pending">
+        <b>${esc(g.team)}: ${esc(g.title)}</b>
+        <p>${kr(g.target)} · slutdatum ${new Date(g.deadline).toLocaleDateString('sv-SE')} · skapat av ${esc(g.by || LEADER.name)}${g.kak ? ` · "Swisha din del" ${kr(kakSum(g))}` : ''}</p>
+        <div class="field"><label for="sw-${g.id}">Pengarna går till</label><select id="sw-${g.id}">
+          <option>Föreningens nummer ${c.swish}, meddelande "${esc(g.msg)}"</option>
+          <option>Eget lagnummer för ${esc(g.team)}</option></select></div>
+        <div class="btns"><button class="btn small" data-approve="${g.id}">Godkänn och publicera</button><button class="btn ghost small" data-reject="${g.id}">Avslå</button></div>
+      </div>`).join('') : '<p class="fine">Inga mål väntar på godkännande.</p>'}
+    </div>
+
+    <div class="panel"><h3>Aktiva insamlingar</h3>
+      <div class="tbl-wrap"><table>
+        <thead><tr><th>Lag</th><th>Swish-meddelande</th><th class="num">Bekräftat</th></tr></thead>
+        <tbody>${liveGoals.map(g => `<tr><td><b>${esc(g.team)}</b></td><td>${esc(g.msg)}</td><td class="num">${kr(g.raised)}</td></tr>`).join('')}</tbody>
+      </table></div>
+      <p class="fine">Sortera Swish-rapporten på meddelandet och för pengarna till respektive lagkassa.</p>
+    </div>`;
+}
+
+function wireClub() {
+  document.querySelectorAll('[data-approve]').forEach(b => b.onclick = () => {
+    const g = byId[b.dataset.approve];
+    g.status = 'live'; g.fresh = 1; seen.delete(g.id);
+    toast(`${g.team}: ${g.title} är publicerat.`, 'Visa', () => { if (radius !== 'all' && g.dist > +radius) { radius = 'all'; $('radius').value = 'all'; } switchTab('discover'); });
+    renderTeam();
+  });
+  document.querySelectorAll('[data-reject]').forEach(b => b.onclick = () => {
+    const g = byId[b.dataset.reject];
+    g.status = 'rejected';
+    GOALS.splice(GOALS.indexOf(g), 1);
+    toast('Målet är avslaget. Lagledaren får ett meddelande.');
+    renderTeam();
+  });
+}
+
+/* Wiring */
+$('btn-skip').onclick = () => decide('left');
+$('btn-like').onclick = () => decide('right');
+$('btn-give').onclick = () => { const g = deckList()[0]; if (g) openGive(g); };
+$('tab-discover').onclick = () => switchTab('discover');
+$('tab-saved').onclick = () => switchTab('saved');
+$('tab-team').onclick = () => switchTab('team');
+$('scrim').onclick = closeSheet;
+$('sheet-close').onclick = closeSheet;
+$('radius').onchange = e => { radius = e.target.value; renderDeck(); };
+$('q').oninput = e => { query = e.target.value; renderResults(); };
+document.addEventListener('keydown', e => {
+  if ($('sheet').classList.contains('open')) { if (e.key === 'Escape') closeSheet(); return; }
+  if ($('view-discover').hidden || !$('results').hidden || e.target.matches('input, select')) return;
+  if (e.key === 'ArrowRight') decide('right');
+  if (e.key === 'ArrowLeft') decide('left');
+});
+
+renderDeck();
+updateTeamBadge();
+</script>

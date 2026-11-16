@@ -1,0 +1,8 @@
+[build]
+  publish = "public"
+
+# Snygga delningslänkar: /m/p14-barcelona-ab12 visar målsidan
+[[redirects]]
+  from = "/m/*"
+  to = "/mal.html"
+  status = 200

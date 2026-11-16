@@ -1,0 +1,13 @@
+# macOS och exFAT-diskar
+.DS_Store
+._*
+
+# Hemligheter får aldrig checkas in
+.env
+.env.*
+
+.netlify/
+
+# Lokala anteckningar och verktyg som inte ska publiceras
+LAGLYFTET.md
+.claude/

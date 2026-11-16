@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Laglyftet</title>
+<meta name="description" content="Swisha din del till laget i stället för att sälja kakor och lotter.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,600;0,700;1,800&family=Figtree:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="/app.css">
+</head>
+<body>
+<main class="wrap">
+  <p class="demo-banner" id="demo-banner" hidden><b>Demoprojekt.</b> Alla lag är påhittade och det går inte att swisha. <a href="#bygg-sjalv">Om projektet</a></p>
+  <header class="top">
+    <a class="logo" href="/">Lag<span>lyftet</span></a>
+    <button class="chip-btn" id="near" type="button">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 22s7-6.2 7-12a7 7 0 1 0-14 0c0 5.8 7 12 7 12Z"/><circle cx="12" cy="10" r="2.5"/></svg>
+      <span id="near-label">Nära mig</span>
+    </button>
+  </header>
+
+  <section class="hero">
+    <h1>Swisha din del till laget</h1>
+    <p>Stötta lokala lag direkt med Swish, i stället för att sälja kakor och lotter. Pengarna går direkt till föreningen.</p>
+  </section>
+
+  <div class="controls">
+    <div class="search">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input id="q" type="search" placeholder="Sök förening, lag eller ort" aria-label="Sök förening, lag eller ort" autocomplete="off">
+    </div>
+    <select id="radius" aria-label="Avstånd" disabled>
+      <option value="all">Hela Sverige</option>
+      <option value="10">Inom 10 km</option>
+      <option value="50">Inom 50 km</option>
+      <option value="500">Inom 500 km</option>
+    </select>
+  </div>
+
+  <div class="seg" role="tablist" aria-label="Visa">
+    <button role="tab" data-view="swipe" aria-selected="true">Swipe</button>
+    <button role="tab" data-view="list" aria-selected="false">Lista</button>
+    <button role="tab" data-view="saved" aria-selected="false">Mina lag <span id="saved-count"></span></button>
+  </div>
+
+  <section id="view" class="stack" aria-live="polite"><p class="muted">Hämtar lagens mål…</p></section>
+
+  <section class="card how">
+    <h2>Så funkar det</h2>
+    <ol>
+      <li><b>Hitta ett lag</b> nära dig, eller sök upp ditt eget.</li>
+      <li><b>Swisha din del</b> direkt till föreningen. Mottagare, belopp och meddelande är redan ifyllda.</li>
+      <li><b>Dela målet</b> så att fler kan hjälpa laget hela vägen.</li>
+    </ol>
+    <p class="fine">Lag märkta <span class="badge-demo">Demo</span> visar hur det ser ut. Det går inte att swisha till dem.</p>
+  </section>
+
+  <section class="card" id="bygg-sjalv" hidden>
+    <h2 class="goal-title">Gillar du idén?</h2>
+    <p>Laglyftet är ett demoprojekt som visar hur föräldrar och släkt kan swisha sin del till laget i stället för att sälja kakor och lotter. Pengarna går direkt till föreningens eget Swish-nummer, aldrig via appen.</p>
+    <ul class="plain">
+      <li><b>Fri kod.</b> Allt finns på GitHub med MIT-licens. Använd det, ändra det, bygg vidare.</li>
+      <li><b>Gratis att köra.</b> Webbplatsen ligger på Netlify och databasen i Supabase, båda på gratisnivå.</li>
+      <li><b>Mer än demon.</b> Den fullständiga versionen har inloggning för lagledare, egna mål och avstämning mot Swish.</li>
+    </ul>
+    <a class="primary" data-github href="#" target="_blank" rel="noopener">Se koden på GitHub</a>
+  </section>
+
+  <section class="card" id="lagledare">
+    <h2 class="goal-title">Är du lagledare?</h2>
+    <p class="muted">Laglyftet är gratis för föreningar. Så här kommer ni igång:</p>
+    <ol class="steps3">
+      <li><b>Berätta om ert lag</b><span>Fyll i formuläret nedan. Det tar en minut.</span></li>
+      <li><b>Föreningen godkänner</b><span>Vi kontrollerar föreningen och kopplar föreningens eget Swish-nummer. Helt gratis.</span></li>
+      <li><b>Dela länken</b><span>Föräldrar, släkt och grannar swishar sin del direkt till föreningen.</span></li>
+    </ol>
+    <!-- Netlify Forms: svaren mejlas till den adress som är inställd i Netlify, adressen syns aldrig på sajten -->
+    <form name="lagledare" method="POST" data-netlify="true" netlify-honeypot="bot-field" id="lead-form" class="stack tight" novalidate>
+      <input type="hidden" name="form-name" value="lagledare">
+      <p hidden><label>Lämna tomt: <input name="bot-field"></label></p>
+      <div class="two">
+        <div class="field"><label class="label" for="l-name">Ditt namn</label><input id="l-name" name="namn" autocomplete="name" required></div>
+        <div class="field"><label class="label" for="l-club">Förening och lag</label><input id="l-club" name="forening" placeholder="T.ex. Haninge IF, P14" required></div>
+      </div>
+      <div class="two">
+        <div class="field"><label class="label" for="l-email">E-post</label><input id="l-email" name="epost" type="email" autocomplete="email" required></div>
+        <div class="field"><label class="label" for="l-phone">Telefon (valfritt)</label><input id="l-phone" name="telefon" type="tel" autocomplete="tel"></div>
+      </div>
+      <div class="field"><label class="label" for="l-msg">Vad samlar ni till? (valfritt)</label><textarea id="l-msg" name="meddelande" rows="3" placeholder="T.ex. cupresa i maj, ungefär 20 000 kr"></textarea></div>
+      <p class="fine">Vi använder uppgifterna bara för att kontakta dig om Laglyftet. Läs mer i <a href="/integritet.html">integritetspolicyn</a>.</p>
+      <p class="err" id="lead-err" hidden></p>
+      <button class="primary" type="submit">Skicka</button>
+    </form>
+    <p class="note" id="lead-ok" hidden>Tack! Vi hör av oss inom ett par dagar.</p>
+  </section>
+
+  <footer class="foot">Laglyftet hanterar inga pengar. Du swishar direkt till föreningens eget Swish-nummer.<br><a href="/villkor.html">Villkor</a> · <a href="/integritet.html">Integritet</a></footer>
+</main>
+<script type="module" src="/index.js"></script>
+</body>
+</html>
